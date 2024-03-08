@@ -1,4 +1,4 @@
 .env
 database.db
 node_modules
-upload*
+tmp/upload*
