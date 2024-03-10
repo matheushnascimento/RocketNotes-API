@@ -62,8 +62,13 @@ class UsersController {
     }
 
     if (password && !oldPassword) {
-      throw new AppError("Informe a senha antigo para definir a nova senha");
+      throw new AppError("Informe a senha atual para definir a nova senha");
     }
+    
+    if (!password && oldPassword) {
+      throw new AppError("Informe a nova senha");
+    }
+
     try {
       user.password = await hash(password, 8);
     } catch (error) {}

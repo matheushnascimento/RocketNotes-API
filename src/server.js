@@ -1,17 +1,20 @@
 require("express-async-errors");
 require("dotenv/config");
 
-import { connection as knexdb } from "./database/knex/index";
-
 const express = require("express");
 const routes = require("./routes");
 const AppError = require("./utils/AppError");
-const migrationsRun = require("./database/sqlite/migrations");
+const connection = require("./database/knex/index");
 const uploadConfig = require("./config/upload");
 
-migrationsRun();
-migrate();
-knexdb.migrate.latest();
+connection.migrate
+  .latest()
+  .then(() => {
+    console.log("Migrations executadas com sucesso!");
+  })
+  .catch(error => {
+    console.error("Erro ao executar migrations:", error);
+  });
 
 const cors = require("cors");
 const app = express();
