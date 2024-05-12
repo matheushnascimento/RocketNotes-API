@@ -6,25 +6,22 @@ const sqliteConnection = require("../database/sqlite");
 
 const knex = require("../database/knex");
 
+const UserRepository = require("../repositories/UserRepository")
+
 class UsersController {
   async create(request, response) {
+    const userRepository = new UserRepository();
     const { name, email, password } = request.body;
 
-    const database = await sqliteConnection();
-    const checkUserExists = await database.get(
-      "SELECT * FROM users WHERE email = (?)",
-      [email]
-    );
+    const checkUserExists = await userRepository.findByEmail(email);
+
     if (checkUserExists) {
       throw new AppError("Este email já está em uso");
     }
 
     const hashedPassword = await hash(password, 8);
 
-    await database.run(
-      "INSERT INTO users (name, email, password) VALUES (?,?,?)",
-      [name, email, hashedPassword]
-    );
+    userRepository.create({name, email, password: hashedPassword})
 
     return response.status(201).json();
   }
