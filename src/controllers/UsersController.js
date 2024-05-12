@@ -6,22 +6,17 @@ const sqliteConnection = require("../database/sqlite");
 
 const knex = require("../database/knex");
 
-const UserRepository = require("../repositories/UserRepository")
+const UserRepository = require("../repositories/UserRepository");
+const UserCreateService = require("../services/UserCreateService");
 
 class UsersController {
   async create(request, response) {
-    const userRepository = new UserRepository();
     const { name, email, password } = request.body;
 
-    const checkUserExists = await userRepository.findByEmail(email);
+    const userRepository = new UserRepository();
+    const userCreateService = new UserCreateService(userRepository);
 
-    if (checkUserExists) {
-      throw new AppError("Este email já está em uso");
-    }
-
-    const hashedPassword = await hash(password, 8);
-
-    userRepository.create({name, email, password: hashedPassword})
+    await userCreateService.execute({ name, email, password });
 
     return response.status(201).json();
   }
@@ -61,7 +56,7 @@ class UsersController {
     if (password && !oldPassword) {
       throw new AppError("Informe a senha atual para definir a nova senha");
     }
-    
+
     if (!password && oldPassword) {
       throw new AppError("Informe a nova senha");
     }
